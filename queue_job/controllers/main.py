@@ -99,7 +99,7 @@ class RunJobController(http.Controller):
                 msg = unicode(err)
             else:
                 msg = _('Job interrupted and set to Done: nothing to do.')
-            job.set_done(msg)
+            job.set_cancel(msg)
             job.store()
             env.cr.commit()
 

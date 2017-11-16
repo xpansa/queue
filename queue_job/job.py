@@ -21,6 +21,7 @@ ENQUEUED = 'enqueued'
 DONE = 'done'
 STARTED = 'started'
 FAILED = 'failed'
+CANCEL = 'cancel'
 
 STATES = [(PENDING, 'Pending'),
           (ENQUEUED, 'Enqueued'),
@@ -360,6 +361,7 @@ class Job(object):
         self._eta = None
         self.eta = eta
         self.channel = channel
+        self.canceled = False
 
     def perform(self):
         """ Execute the job.
@@ -412,6 +414,8 @@ class Job(object):
             vals['date_done'] = dt_to_string(self.date_done)
         if self.eta:
             vals['eta'] = dt_to_string(self.eta)
+        if self.canceled:
+            vals['active'] = False
 
         db_record = self.db_record()
         if db_record:
@@ -505,6 +509,11 @@ class Job(object):
         self.state = FAILED
         if exc_info is not None:
             self.exc_info = exc_info
+
+    def set_cancel(self, result=None):
+        self.canceled = True
+        result = result if result is not None else 'Canceled. Nothing to do.'
+        self.set_done(result=result)
 
     def __repr__(self):
         return '<Job %s, priority:%d>' % (self.uuid, self.priority)

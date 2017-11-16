@@ -117,6 +117,8 @@
                     domain="[('state', '=', 'done')]"/>
                 <filter name="failed" string="Failed"
                     domain="[('state', '=', 'failed')]"/>
+                <filter name="cancelled" string="Cancelled"
+                    domain="[('state', '=', 'done'), ('active', '=', False)]"/>
                 <group expand="0" string="Group By">
                     <filter string="Channel" context="{'group_by': 'channel'}" />
                     <filter string="Job Function" context="{'group_by': 'job_function_id'}" />

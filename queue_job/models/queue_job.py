@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 from openerp import models, fields, api, exceptions, _
 
-from ..job import STATES, DONE, PENDING, Job
+from ..job import STATES, DONE, PENDING, CANCEL, Job
 from ..fields import convert_to_cache, convert_to_column
 
 _logger = logging.getLogger(__name__)
@@ -82,6 +82,7 @@ class QueueJob(models.Model):
                           inverse='_inverse_channel',
                           store=True,
                           index=True)
+    active = fields.Boolean(default=True, )
 
     @api.multi
     def _inverse_channel(self):
@@ -141,10 +142,12 @@ class QueueJob(models.Model):
         """
         for record in self:
             job_ = Job.load(record.env, record.uuid)
-            if state == DONE:
+            if state in (DONE, CANCEL):
                 job_.set_done(result=result)
             elif state == PENDING:
                 job_.set_pending(result=result)
+            elif state == CANCEL:
+                job_.set_cancel(result=result)
             else:
                 raise ValueError('State not supported: %s' % state)
             job_.store()

@@ -142,7 +142,7 @@ class QueueJob(models.Model):
         """
         for record in self:
             job_ = Job.load(record.env, record.uuid)
-            if state in (DONE, CANCEL):
+            if state == DONE:
                 job_.set_done(result=result)
             elif state == PENDING:
                 job_.set_pending(result=result)

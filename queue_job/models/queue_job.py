@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from openerp import models, fields, api, exceptions, _
 
 from ..job import STATES, DONE, PENDING, CANCEL, Job
+from ..exception import NoSuchJobError
 from ..fields import convert_to_cache, convert_to_column
 
 _logger = logging.getLogger(__name__)
@@ -141,7 +142,12 @@ class QueueJob(models.Model):
         will change the other fields (date, result, ...)
         """
         for record in self:
-            job_ = Job.load(record.env, record.uuid)
+            try:
+                job_ = Job.load(record.env, record.uuid)
+            except NoSuchJobError:
+                msg = 'Job {} already inactive'.format(record.uuid)
+                _logger.warning(msg)
+                continue
             if state == DONE:
                 job_.set_done(result=result)
             elif state == PENDING:

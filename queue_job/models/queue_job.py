@@ -228,13 +228,16 @@ class QueueJob(models.Model):
     @api.model
     def autovacuum(self):
         """ Delete all jobs done since more than ``_removal_interval`` days.
+        Also deleted all inactive jobs.
 
         Called from a cron.
         """
         deadline = datetime.now() - timedelta(days=self._removal_interval)
-        jobs = self.search(
+        active_jobs = self.search(
             [('date_done', '<=', fields.Datetime.to_string(deadline))],
         )
+        inactive_jobs = self.search([('active', '=', False)])
+        jobs = active_jobs + inactive_jobs
         jobs.unlink()
         return True
 

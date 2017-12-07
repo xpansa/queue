@@ -264,9 +264,14 @@ class Job(object):
         return new_job
 
     @staticmethod
-    def db_record_from_uuid(env, job_uuid):
+    def db_record_from_uuid(env, job_uuid, all_records=False):
         model = env['queue.job'].sudo()
         record = model.search([('uuid', '=', job_uuid)], limit=1)
+        if all_records:
+            active_records = model.search([('uuid', '=', job_uuid), ('active', '=', True)])
+            inactive_records = model.search([('uuid', '=', job_uuid), ('active', '=', False)])
+            records = active_records + inactive_records
+            record = records[0]
         return record.with_env(env)
 
     def __init__(self, func,
@@ -416,6 +421,7 @@ class Job(object):
             vals['eta'] = dt_to_string(self.eta)
         if self.canceled:
             vals['active'] = False
+            vals['state'] = DONE
 
         db_record = self.db_record()
         if db_record:
@@ -441,7 +447,7 @@ class Job(object):
             self.env[self.job_model_name].sudo().create(vals)
 
     def db_record(self):
-        return self.db_record_from_uuid(self.env, self.uuid)
+        return self.db_record_from_uuid(self.env, self.uuid, all_records=True)
 
     @property
     def func(self):

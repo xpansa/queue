@@ -271,7 +271,10 @@ class Job(object):
             active_records = model.search([('uuid', '=', job_uuid), ('active', '=', True)])
             inactive_records = model.search([('uuid', '=', job_uuid), ('active', '=', False)])
             records = active_records + inactive_records
-            record = records[0]
+            try:
+                record = records[0]
+            except IndexError:
+                pass
         return record.with_env(env)
 
     def __init__(self, func,

@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from odoo import models, fields, api, exceptions, _
 
 from ..job import STATES, DONE, PENDING, Job
-from ..fields import JobSerialized
+from ..fields import JobSerialized, Serialized
 
 _logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class QueueJob(models.Model):
 
     model_name = fields.Char(string='Model', readonly=True)
     method_name = fields.Char(readonly=True)
-    record_ids = fields.Serialized(readonly=True)
+    record_ids = Serialized(readonly=True)
     args = JobSerialized(readonly=True)
     kwargs = JobSerialized(readonly=True)
     func_string = fields.Char(string='Task', compute='_compute_func_string',

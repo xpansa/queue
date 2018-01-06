@@ -10,6 +10,23 @@ import dateutil
 from odoo import fields, models
 
 
+class Serialized(fields.Field):
+    """ Serialized fields provide the storage for sparse fields. """
+    type = 'serialized'
+    _slots = {
+        'prefetch': False,              # not prefetched by default
+    }
+    column_type = ('text', 'text')
+
+    def convert_to_column(self, value, record, values=None):
+        return json.dumps(value)
+
+    def convert_to_cache(self, value, record, validate=True):
+        # cache format: dict
+        value = value or {}
+        return value if isinstance(value, dict) else json.loads(value)
+
+
 class JobSerialized(fields.Field):
     """ Serialized fields provide the storage for sparse fields. """
     type = 'job_serialized'

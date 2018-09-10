@@ -76,6 +76,11 @@ class RunJobController(http.Controller):
             job.store()
             env.cr.commit()
 
+        def clear_env(env):
+            """ Clear any dangling recomputations from failed job """
+            env.clear_recompute_old()
+            env.all.todo.clear()
+
         job = self._load_job(env, job_uuid)
         if job is None:
             return ""
@@ -112,7 +117,7 @@ class RunJobController(http.Controller):
             buff = StringIO()
             traceback.print_exc(file=buff)
             _logger.error(buff.getvalue())
-            job.env.clear()
+            clear_env(job.env)
             with openerp.api.Environment.manage():
                 with openerp.registry(job.env.cr.dbname).cursor() as new_cr:
                     job.env = job.env(cr=new_cr)
